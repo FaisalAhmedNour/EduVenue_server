@@ -103,7 +103,6 @@ async function run() {
             const details = req.body;
             // console.log(email, details);
             const filter = { email: email };
-            const
             const updateDoc = {
                 $set: {
                     name: details.name,
