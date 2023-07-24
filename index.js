@@ -25,6 +25,9 @@ async function run() {
         await client.connect();
 
         const collegesCollection = client.db("EduVenueDB").collection("colleges");
+        const usersCollection = client.db("EduVenueDB").collection("users");
+        const ratingsCollection = client.db("EduVenueDB").collection("ratings");
+        const admittedUsersCollection = client.db("EduVenueDB").collection("admitted_users");
 
         app.get('/colleges', async (req, res) => {
             const name = req.query.name;
@@ -45,6 +48,80 @@ async function run() {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await collegesCollection.findOne(query);
+            // console.log(result)
+            res.send(result)
+        })
+
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const query = { email: user.email }
+            const existingUser = await usersCollection.findOne(query);
+            // console.log(existingUser)
+            if (existingUser) {
+                return res.send({ message: "user already exists" });
+            }
+            const result = await usersCollection.insertOne(user);
+            res.send(result)
+        })
+
+        // app.get('/users', async (req, res) => {
+        //     const result = await usersCollection.find();
+        //     res.send(result)
+        // })
+
+        app.get('/users', async (req, res) => {
+            const result = await usersCollection.find().toArray();
+            res.send(result)
+        })
+
+        app.put('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const details = req.body;
+            // console.log(email, details);
+            const filter = { email: email };
+            const updateDoc = {
+                $set: {
+                    name: details.name,
+                    email: details.email,
+                    address: details.address,
+                    university: details.university
+                },
+            }
+            const options = { upsert: true };
+            // const result = await usersCollection.findOne(query);
+            const result = await usersCollection.updateOne(filter, updateDoc, options);
+            res.send(result)
+        })
+
+        app.get("/admitted_users", async(req, res) => {
+            const result = await admittedUsersCollection.find().toArray();
+            res.send(result)
+        })
+        
+        app.put('/admitted_users/:email', async (req, res) => {
+            const email = req.params.email;
+            const details = req.body;
+            // console.log(email, details);
+            const filter = { email: email };
+            const
+            const updateDoc = {
+                $set: {
+                    name: details.name,
+                    subject: details.subject,
+                    email: details.email,
+                    phone: details.phone,
+                    address: details.address,
+                    birth_date: details.birth_date
+                },
+            }
+            const options = { upsert: true };
+            // const result = await usersCollection.findOne(query);
+            const result = await admittedUsersCollection.updateOne(filter, updateDoc, options);
+            res.send(result)
+        })
+
+        app.get('/ratings', async (req, res) => {
+            const result = await ratingsCollection.find().toArray();
             // console.log(result)
             res.send(result)
         })
